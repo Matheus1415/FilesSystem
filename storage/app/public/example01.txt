@@ -1,6 +1,0 @@
-Esse é o exemplo 01....
-
-Aqui temos mais conteúdo para o arquivo.
-Você pode adicionar múltiplas linhas, texto explicativo, ou qualquer informação que quiser.
-
-Laravel facilita muito o armazenamento de arquivos!
