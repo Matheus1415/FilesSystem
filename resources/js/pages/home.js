@@ -14,10 +14,40 @@ $(document).ready(function () {
                 data: "name",
                 title: "Nome",
                 render: function (data, type, row) {
-                    const icon =
-                        row.type === "folder"
-                            ? '<i class="icon-folder text-yellow-500 mr-2"></i>'
-                            : '<i class="icon-file text-gray-500 mr-2"></i>';
+                    let icon = "";
+                    switch (row.type) {
+                        case "folder":
+                            icon =
+                                '<i class="icon-folder text-yellow-500 mr-2"></i>';
+                            break;
+                        case "text":
+                            icon =
+                                '<i class="icon-file-text text-green-500 mr-2"></i>';
+                            break;
+                        case "image":
+                            icon =
+                                '<i class="icon-file-image text-blue-500 mr-2"></i>';
+                            break;
+                        case "pdf":
+                            icon =
+                                '<i class="icon-file-text text-red-500 mr-2"></i>';
+                            break;
+                        case "csv":
+                            icon =
+                                '<i class="icon-file-csv text-indigo-500 mr-2"></i>';
+                            break;
+                        case "json":
+                            icon =
+                                '<i class="icon-file-code text-purple-500 mr-2"></i>';
+                            break;
+                        case "video":
+                            icon =
+                                '<i class="icon-clapperboard text-emerald-500 mr-2"></i>';
+                            break;
+                        default:
+                            icon =
+                                '<i class="icon-file text-gray-500 mr-2"></i>';
+                    }
                     return `${icon}<span>${data}</span>`;
                 },
             },

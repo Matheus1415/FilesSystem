@@ -139,7 +139,6 @@ class FileSystemController extends Controller
                 $folders = Storage::disk('public')->directories($directory);
                 $files = Storage::disk('public')->files($directory);
 
-                // Mapear diretórios
                 foreach ($folders as $folder) {
                     $data[] = [
                         'name' => basename($folder),
@@ -150,16 +149,33 @@ class FileSystemController extends Controller
                     ];
                 }
 
-                // Mapear arquivos
                 foreach ($files as $file) {
+                    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                    $type = 'other';
+
+                    if (in_array($extension, ['txt', 'log', 'md', 'xml', 'csv'])) {
+                        $type = 'text';
+                    } elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'])) {
+                        $type = 'image';
+                    } elseif ($extension === 'pdf') {
+                        $type = 'pdf';
+                    } elseif ($extension === 'json') {
+                        $type = 'json';
+                    } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm', 'mpeg'])) {
+                        $type = 'video';
+                    } else {
+                        $type = 'other';
+                    }
+
                     $data[] = [
                         'name' => basename($file),
                         'path' => $file,
-                        'type' => 'file',
+                        'type' => $type,
                         'size_kb' => round(Storage::disk('public')->size($file) / 1024, 2),
                         'last_modified' => Carbon::createFromTimestamp(Storage::disk('public')->lastModified($file))->diffForHumans(),
                     ];
                 }
+
 
                 $message = "Conteúdo do diretório '$directory'.";
                 $status = "Success";
