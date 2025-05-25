@@ -6,10 +6,10 @@
 @php
     $isPrimary = $variant === 'primary';
 
-    $classes = 'flex items-center justify-center w-full border-2 rounded-md py-1 px-2 gap-2 capitalize';
+    $classes = 'flex items-center justify-center w-full border-2 rounded-md py-1 px-2 gap-2 capitalize transition-all';
     $classes .= $isPrimary 
-        ? ' bg-primary border-primary text-background-foreground'
-        : ' border-primary text-primary';
+        ? ' bg-primary border-primary text-background-foreground hover:bg-primary/90'
+        : ' border-primary text-primary hover:bg-primary/5';
 @endphp
 
 <button {{ $attributes->merge(['class' => $classes]) }}>
