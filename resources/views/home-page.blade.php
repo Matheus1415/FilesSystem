@@ -28,18 +28,10 @@
                 <x-card>
                     <div class="border-1 border-frost-50 rounded-md">
                         <div class="p-4">
-                            <x-button class="text-sm !w-fit">
-                                Upload
-                            </x-button>
-                        </div>
 
-                        <hr>
-
-                        <div class="p-4">
-
-                            <form action="/upload-form" id="upload-form" class="dropzone">
-                                <div
-                                    class="dz-message flex flex-col items-center justify-center border-2 border-dashed border-frost/50 rounded p-8 bg-background-foreground text-frost transition hover:bg-frost/10">
+                            <form action="{{ '/upload-form'}}" id="upload-form" class="dropzone" data-path="">
+                                @csrf
+                                <div class="dz-message flex flex-col items-center justify-center border-2 border-dashed border-frost/50 rounded p-8 bg-background-foreground text-frost transition hover:bg-frost/10">
                                     <i class="icon-upload text-5xl mb-4 text-primary"></i>
                                     <span class="text-lg text-center leading-5 font-bold">Solte os arquivos aqui</span>
                                     <span class="text-sm text-center leading-4.5 text-muted">Ou clique para escolher</span>
@@ -58,7 +50,7 @@
 
                     <div class="grid grid-cols-3 gap-2">
                         <x-folder-button class="foldrs-select" folderName="Main"
-                            data-pathfolder="/" filesAmount="{{$countFileMain}}" />
+                            data-pathfolder="/" filesAmount="{{$countFileMain}}"/>
                         @foreach ($directories as $directorie)
                             <x-folder-button id="{{ $directorie['directory'] }}" class="foldrs-select" folderName="{{ $directorie['directory'] }}"
                                 data-pathfolder="{{ $directorie['directory'] }}"

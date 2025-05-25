@@ -6,6 +6,7 @@ $(document).ready(function () {
     var folderSelect = "/";
 
     const table = $("#myTable").DataTable({
+        responsive: true,
         ajax: {
             url: "/list/directorie",
             dataSrc: function (json) {
@@ -120,7 +121,6 @@ $(document).ready(function () {
                 },
             },
         ],
-        responsive: true,
         language: {
             searchPlaceholder: "Filtrar...",
             sLengthMenu: "_MENU_ registros por página",

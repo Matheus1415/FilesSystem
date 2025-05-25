@@ -266,6 +266,31 @@ class FileSystemController extends Controller
         }
     }
 
+    public function uploadFile(Request $request)
+    {        
+        
+        if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
+            return response()->json(['erro' => 'Arquivo inválido.'], 422);
+        }   
+
+        $path = $request['path'];
+        $file = $request['file'];
+
+        $fileName = $file->getClientOriginalName();
+
+        $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
+
+        if (!$filePath) {
+            return response([
+                'message' => 'Occoreu um erro ao tentar salvar seu arquivo tente novamente mais tarde'
+            ]);
+        }
+
+        return response([
+            'message' => 'Arquivo criado com suceeso'
+        ], 200);
+    }
+
     public function downloadFile(Request $request)
     {
         $filePath = $request->path;
@@ -336,5 +361,6 @@ class FileSystemController extends Controller
             'status' => 'Success',
         ], 201);
     }
+
 
 }
