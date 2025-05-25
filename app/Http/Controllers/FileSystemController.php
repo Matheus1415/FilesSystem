@@ -7,39 +7,21 @@ use Illuminate\Support\Facades\Storage;
 
 class FileSystemController extends Controller
 {
-    public function index()
+    public function ManangeView()
     {
-        $message = '';
-        $status = '';
-        $code = '';
+        $directories = Storage::disk('public')->directories();
         $data = [];
+        foreach ($directories as $directory) {
+            $files = Storage::disk('public')->files($directory);
 
-        try {
-            $directories = Storage::disk('public')->directories();
-
-            foreach ($directories as $directory) {
-                $files = Storage::disk('public')->files($directory);
-
-                $data[] = [
-                    'directory' => $directory,
-                    'countFile' => count($files),
-                ];
-            }
-
-            $message = "Todos os documentos.";
-            $status = "All";
-            $code = 200;
-        } catch (\Exception $e) {
-            $message = "Houve um erro ao tentar se comunicar com o servidor de dados";
-            $status = "Error";
-            $code = 500;
+            $data[] = [
+                'directory' => $directory,
+                'countFile' => count($files),
+            ];
         }
-
-        return response()->json([
-            'message' => $message,
-            'status' => $status,
-            'data' => $data,
-        ], $code);
+        return view('home-page', [
+            'directories' => $data
+        ]);
     }
 
     public function createText()
@@ -53,7 +35,7 @@ class FileSystemController extends Controller
             $fileName = 'example01.txt';
             $path = "texts/$fileName";
 
-            
+
             if (Storage::disk('public')->exists($path)) {
                 $message = "Documento $fileName já existe.";
                 $status = "Duplicated";
@@ -269,7 +251,7 @@ class FileSystemController extends Controller
 
         try {
             $directory = $request->input('directorie', '');
-            
+
             if (!Storage::disk('public')->exists($directory)) {
                 $message = "Diretório '$directory' não encontrado.";
                 $status = "Not Found";

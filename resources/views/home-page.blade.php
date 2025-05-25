@@ -10,15 +10,15 @@
                     <h3 class="capitalize text-lg text-frost font-semibold mb-2">
                         Account storage
                     </h3>
-    
+
                     <div class="bg-primary h-40 mb-2"></div>
-    
-                    <div class="flex flex-col lg:flex-row items-center justify-center gap-x-4 gap-y-2">
+
+                    <div class="flex items-center justify-center gap-4">
                         <x-button icon='icon-search'>
                             Details
                         </x-button>
-    
-    
+
+
                         <x-button icon='icon-upload' variant='primary'>
                             Upgrade
                         </x-button>
@@ -31,16 +31,11 @@
                     <h3 class="capitalize text-lg text-frost font-semibold mb-2">
                         Folders
                     </h3>
-                    
+
                     <div class="grid grid-cols-3 gap-2">
-                        
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel ativo' fileAmount='22' isActive class="active"/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
+                        @foreach ($directories as $directorie)
+                            <x-folder-button folderName="{{$directorie['directory']}}" filesAmount="{{$directorie['countFile']}}" />
+                        @endforeach
                     </div>
                 </x-card>
 
