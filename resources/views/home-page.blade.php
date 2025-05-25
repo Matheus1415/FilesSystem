@@ -10,15 +10,15 @@
                     <h3 class="capitalize text-lg text-frost font-semibold mb-2">
                         Account storage
                     </h3>
-    
+
                     <div class="bg-primary h-40 mb-2"></div>
-    
-                    <div class="flex flex-col lg:flex-row items-center justify-center gap-x-4 gap-y-2">
+
+                    <div class="flex items-center justify-center gap-4">
                         <x-button icon='icon-search'>
                             Details
                         </x-button>
-    
-    
+
+
                         <x-button icon='icon-upload' variant='primary'>
                             Upgrade
                         </x-button>
@@ -31,47 +31,44 @@
                     <h3 class="capitalize text-lg text-frost font-semibold mb-2">
                         Folders
                     </h3>
-                    
+
                     <div class="grid grid-cols-3 gap-2">
-                        
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel ativo' fileAmount='22' isActive class="active"/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
-                        <x-folder-button folderName='daniel' fileAmount='22'/>
+                        @foreach ($directories as $directorie)
+                            <x-folder-button folderName="{{ $directorie['directory'] }}"
+                                data-pathfolder="{{ $directorie['directory'] }}"
+                                filesAmount="{{ $directorie['countFile'] }}" />
+                        @endforeach
                     </div>
                 </x-card>
 
                 <x-card>
                     <h3 class="capitalize text-lg text-frost font-semibold mb-2">
-                        Recent uploads
+                        Lista de Arquivos
                     </h3>
+
+                    <div class="flex space-x-4">
+                        <button
+                            class="add-text inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                            Criar Arquivo example
+                        </button>
+                        <button
+                            class="add-json inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                            Criar json
+                        </button>
+                    </div>
+
 
                     <table id="myTable">
                         <thead>
                             <tr>
-                                <th>Nome</th>
-                                <th>Data</th>
-                                <th>Tamanho</th>
-                                <th>Ações</th>
+                                <th class="px-4 py-2">Nome</th>
+                                <th class="px-4 py-2">Data</th>
+                                <th class="px-4 py-2">Tamanho</th>
+                                <th class="px-4 py-2 text-center">Ações</th>
                             </tr>
+
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>daniel</td>
-                                <td>otem</td>
-                                <td>12kb</td>
-                                <td class="space-x-4">
-                                    <button class="h-4 w-4 font-semibold cursor-pointer text-red-500">
-                                        <i class="icon-x"></i>
-                                    </button>
-                                    <button class="h-4 w-4 font-semibold cursor-pointer text-blue-500">
-                                        <i class="icon-pencil"></i>
-                                    </button>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
                 </x-card>
