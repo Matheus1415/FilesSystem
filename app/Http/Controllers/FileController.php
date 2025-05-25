@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -155,5 +156,49 @@ class FileController extends Controller
 
         // # Deletando uma pasta dentro de outra pasta
         Storage::deleteDirectory('documents/teste');
+    }
+
+    public function listFilesWithMetaData()
+    {
+        $list_files = Storage::allFiles();
+
+        $files = [];
+
+        foreach ($list_files as $file) {
+            $files[] = [
+                'name' => $file,
+                'size' => round(Storage::size($file) / 1024, 2) . 'Kb',
+                'last_modified' => Carbon::createFromTimestamp(Storage::lastModified($file)),
+                'mime_type' => Storage::mimeType($file),
+            ];
+        }
+
+        return view('list-metadata', ['files' => $files]);
+    }
+
+    public function listFilesForDownLoad()
+    {
+        $list_files = Storage::allFiles();
+        $files = [];
+
+        foreach ($list_files as $file) {
+            $files[] = [
+                'name' => $file,
+                'size' => round(Storage::size($file) / 1024, 2) . 'Kb',
+                // 'file_url' => Storage::url($file),
+                'file' => basename($file),
+            ];
+        }
+
+        return view('list-files-download', ['files' => $files]);
+    }
+
+    public function upload(Request $request)
+    {
+        // # Carregando o arquivo na pasta uplaod
+        // $request->file('arquivo')->store('/upload');
+
+        // # Caregndo o arquivo renomeado
+        $request->file('arquivo')->storeAs('/public',$request->file('arquivo')->getClientOriginalName());
     }
 }

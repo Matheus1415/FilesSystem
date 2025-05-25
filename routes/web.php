@@ -29,8 +29,15 @@ Route::get('/storage_local_create_folder',[FileController::class,'storageLocalCr
 Route::get('/storage_local_delete_folder',[FileController::class,'storageLocalDeleteFolder'])->name('storage.local.delete.folder');
 
 //Meta dados
-Route::get('/storage_local_liste_files_metadados',[FileController::class,'storageLocalDeletlisteFolder'])->name('storage.local.list.files.metadata');
+Route::get('/storage_local_list_files_metadados',[FileController::class,'listFilesWithMetaData'])->name('storage.local.list.files.metadata');
+Route::get('/storage_local_list_for_download',[FileController::class,'listFilesForDownLoad'])->name('storage.local.list.download');
 
+//Upload
+Route::post('/storage_local_upload',[FileController::class,'upload'])->name('storage.local.list.upload');
+
+Route::get('/download/{file}', function($filePath){
+return response()->download('storage/'.$filePath);
+})->name('download');
 
 //Posso carregar um documetno específico
 Route::get('/doc',function(){
