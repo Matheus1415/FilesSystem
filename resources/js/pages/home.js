@@ -423,24 +423,88 @@ $(document).ready(function () {
             },
         });
     });
-});
 
-let myDropzone = new Dropzone("#upload-form", {
-    url: "/upload", // endpoint
-    maxFiles: 5, // limite de arquivos
-    maxFilesize: 1, // MB
-    acceptedFiles: "image/*", // tipos aceitos
-    disablePreviews: true,
+    // --- Daniel --- //
 
-    dictDefaultMessage: null,
-    dictRemoveFile: "Remover",
-    dictMaxFilesExceeded: "Você só pode enviar até 5 arquivos.",
-});
 
-myDropzone.on("addedfile", (file) => {
-    console.log(`File added: ${file.name}`);
-});
 
-$(document).ready(() => {
-    console.log(myDropzone);
+    let myDropzone = new Dropzone("#upload-form", {
+        url: "/upload", // endpoint
+        autoProcessQueue: false, // impede o envio automático
+        maxFiles: 1, // limite de arquivos
+        maxFilesize: 10, // MB
+        // acceptedFiles: "image/*", // tipos aceitos
+        disablePreviews: true,
+    
+        dictDefaultMessage: null,
+        dictRemoveFile: "Remover",
+        dictMaxFilesExceeded: "Você só pode enviar até 5 arquivos.",
+    
+    });
+    
+    
+    myDropzone.on("addedfile", function (file) {
+        const formData = new FormData();
+    
+        formData.append("file", file, file.name);
+    
+        formData.append("path", folderSelect);
+    
+        formData.append(
+            "_token",
+            $('meta[name="csrf-token"]').attr("content")
+        );
+    
+        $.ajax({
+            url: '/upload/file',
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+    
+            success: function (response) {
+                Swal.fire({
+                    title:
+                        response.success
+                            ? "Arquivo Enviado com successo"
+                            : "Erro",
+                    text: response.message,
+                    icon:
+                        response.success
+                            ? "success"
+                            : "error",
+                });
+                if (response.success) {
+                    table.ajax.reload(null, false);
+                }
+            },
+
+            error: function (xhr) {
+                console.error(
+                    "Erro na requisição:",
+                    xhr.responseJSON?.message || xhr.statusText
+                );
+            },
+        })
+    });
+    
+    myDropzone.on("success", file => {
+        Swal.fire({
+            title: "Arquivo enviado com sucesso|",
+            text: `O arquivo "${file.name}" foi enviado com sucesso.`,
+            icon: "success",
+            confirmButtonText: "Certo",
+        })
+    });
+    
+    myDropzone.on("error", file => {
+        Swal.fire({
+            title: "Erro ao enviar arquivo",
+            text: `Não foi possivel enviar o arquivo "${file.name}".`,
+            icon: "warning",
+            confirmButtonText: "Certo",
+        })
+    });
+
+
 });

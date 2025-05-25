@@ -266,7 +266,6 @@ class FileSystemController extends Controller
 
     public function uploadFile(Request $request)
     {        
-        
         if (!$request->hasFile('file') || !$request->file('file')->isValid()) {
             return response()->json(['erro' => 'Arquivo inválido.'], 422);
         }   
@@ -280,12 +279,14 @@ class FileSystemController extends Controller
 
         if (!$filePath) {
             return response([
-                'message' => 'Occoreu um erro ao tentar salvar seu arquivo tente novamente mais tarde'
+                'message' => 'Occoreu um erro ao tentar salvar seu arquivo tente novamente mais tarde',
+                'success' => false
             ]);
         }
 
         return response([
-            'message' => 'Arquivo criado com suceeso'
+            'message' => 'Arquivo criado com suceeso',
+            'success' => true
         ], 200);
     }
 
