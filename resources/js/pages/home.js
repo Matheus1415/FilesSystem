@@ -1,8 +1,12 @@
 import $ from "jquery";
 import DataTable from "datatables.net";
+import $ from "jquery";
+import DataTable from "datatables.net";
 import Dropzone from "dropzone";
 
 $(document).ready(function () {
+    let folderSelect = "/";
+
     let folderSelect = "/";
 
     const table = $("#myTable").DataTable({
@@ -11,6 +15,9 @@ $(document).ready(function () {
             url: "/list/directorie",
             dataSrc: function (json) {
                 return json?.data || [];
+            },
+            data: function (d) {
+                d.directory = folderSelect;
             },
             data: function (d) {
                 d.directory = folderSelect;
@@ -61,7 +68,14 @@ $(document).ready(function () {
             {
                 data: "size_kb",
                 title: "Tamanho",
+                data: "size_kb",
+                title: "Tamanho",
                 render: function (data, type, row) {
+                    if (data == null) {
+                        return "-";
+                    } else {
+                        return `${data}kb`;
+                    }
                     if (data == null) {
                         return "-";
                     } else {
@@ -73,6 +87,9 @@ $(document).ready(function () {
                 data: "size_kb",
                 title: "Tamanho",
                 render: function (data, type, row) {
+                    return row.type === "file" && data
+                        ? `${data.size_kb}kb`
+                        : "—";
                     return row.type === "file" && data
                         ? `${data.size_kb}kb`
                         : "—";
@@ -95,16 +112,29 @@ $(document).ready(function () {
                     `;
                     }
 
-                    return `
-                    <div class="flex gap-2">
+                    let buttons = `
                         <button data-path="${row.path}" class="delete-btn-file text-red-500 hover:text-red-700" title="Excluir">
                             <i class="icon-x"></i>
                         </button>
-                        <button data-path="${row.path}" class="edit-btn text-blue-500 hover:text-blue-700" title="Editar">
-                            <i class="icon-pencil"></i>
-                        </button>
-                    </div>
-                `;
+                    `;
+
+                    if (row.type !== "json") {
+                        buttons += `
+                            <button data-path="${row.path}" class="download-btn-file text-blue-500 hover:text-blue-700" title="Download">
+                                <i class="icon-download"></i>
+                            </button>
+                        `;
+                    }
+
+                    if (row.type === "json") {
+                        buttons += `
+                            <button data-path="${row.path}" class="copy-json-btn text-green-500 hover:text-green-700" title="Copiar conteúdo JSON">
+                                <i class="icon-copy"></i>
+                            </button>
+                        `;
+                    }
+
+                    return `<div class="flex gap-2">${buttons}</div>`;
                 },
             },
         ],
@@ -118,6 +148,32 @@ $(document).ready(function () {
             },
         },
         order: [[0, "asc"]],
+    });
+
+    $(document).on("click", ".folder-select", function () {
+        const path = $(this).data("pathfolder");
+        $(".folder-select")
+            .removeClass(
+                "border-primary bg-primary text-background-foreground hover:bg-primary/90"
+            )
+            .addClass("text-frost hover:bg-frost/5");
+        let selectedFolderId = $("#" + CSS.escape(path));
+        if (selectedFolderId.length > 0) {
+            selectedFolderId
+                .addClass(
+                    "border-primary bg-primary text-background-foreground hover:bg-primary/90"
+                )
+                .removeClass("text-frost");
+        }
+
+        $(this)
+            .addClass(
+                "border-primary bg-primary text-background-foreground hover:bg-primary/90"
+            )
+            .removeClass("text-frost");
+
+        folderSelect = path;
+        table.ajax.reload(null, false);
     });
 
     $(document).on("click", ".folder-select", function () {
@@ -208,6 +264,7 @@ $(document).ready(function () {
 
     $(document).on("click", ".delete-btn-file", function () {
         const path = $(this).data("path");
+        const path = $(this).data("path");
 
         Swal.fire({
             title: "Tem certeza?",
@@ -234,19 +291,89 @@ $(document).ready(function () {
                     processData: false,
                     contentType: false,
                     success: function (response) {
-                        Swal.fire({
-                            title:
-                                response.status === "Deleted"
-                                    ? "Arquivo Excluído"
-                                    : "Erro",
-                            text: response.message,
-                            icon:
-                                response.status === "Deleted"
-                                    ? "success"
-                                    : "error",
-                        });
-                        if (response.status === "Deleted") {
-                            table.ajax.reload(null, false);
+                        if (response.status === "Not Found") {
+                            Swal.fire({
+                                title: "Pasta não encontrada",
+                                text: response.message,
+                                icon: "waring",
+                            });
+                        } else {
+                            Swal.fire({
+                                title:
+                                    response.status === "Deleted"
+                                        ? "Arquivo Excluído"
+                                        : "Erro",
+                                text: response.message,
+                                icon:
+                                    response.status === "Deleted"
+                                        ? "success"
+                                        : "error",
+                            });
+                            if (response.status === "Deleted") {
+                                table.ajax.reload(null, false);
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(
+                            "Erro na requisição:",
+                            xhr.responseJSON?.message || xhr.statusText
+                        );
+                    },
+                });
+            }
+        });
+    });
+
+    $(document).on("click", ".delete-btn-folder", function () {
+        const path = $(this).data("path");
+
+        Swal.fire({
+            title: "Tem certeza?",
+            text: `Deseja realmente deletar a pasta "${path}"?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, deletar!",
+            cancelButtonText: "Cancelar",
+        }).then((result) => {
+            const path = $(this).data("path");
+
+            let formData = new FormData();
+            formData.append("path", path);
+            formData.append(
+                "_token",
+                $('meta[name="csrf-token"]').attr("content")
+            );
+
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/delete/directorie",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.status === "Not Found") {
+                            Swal.fire({
+                                title: "Pasta não encontrada",
+                                text: response.message,
+                                icon: "waring",
+                            });
+                        } else {
+                            Swal.fire({
+                                title:
+                                    response.status === "Deleted"
+                                        ? "Arquivo Excluído"
+                                        : "Erro",
+                                text: response.message,
+                                icon:
+                                    response.status === "Deleted"
+                                        ? "success"
+                                        : "error",
+                            });
+                            if (response.status === "Deleted") {
+                                table.ajax.reload(null, false);
+                            }
                         }
                     },
                     error: function (xhr) {
@@ -318,6 +445,89 @@ $(document).ready(function () {
     // --- Daniel --- //
 
 
+    });
+
+    $(document).on("click", ".download-btn-file", function () {
+        const path = $(this).data("path");
+
+        $.ajax({
+            url: "/download/file",
+            method: "GET",
+            data: {
+                path,
+            },
+            xhrFields: {
+                responseType: "blob",
+            },
+            success: function (blob, status, xhr) {
+                let filename = "";
+                const disposition = xhr.getResponseHeader(
+                    "Content-Disposition"
+                );
+                if (disposition && disposition.indexOf("attachment") !== -1) {
+                    const filenameRegex =
+                        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    const matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, "");
+                    }
+                }
+                if (!filename) filename = "downloaded_file";
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            },
+            error: function (xhr) {
+                let errMsg = "Erro ao baixar arquivo.";
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if (res.message) errMsg = res.message;
+                } catch {}
+                alert(errMsg);
+            },
+        });
+    });
+
+    $(document).on("click", ".copy-json-btn", function () {
+        const path = $(this).data("path");
+
+        $.ajax({
+            url: "/json-content",
+            method: "GET",
+            data: { path },
+            success: function (response) {
+                navigator.clipboard
+                    .writeText(JSON.stringify(response, null, 2))
+                    .then(() => {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Conteúdo copiado!",
+                            text: "O conteúdo do arquivo JSON foi copiado para a área de transferência.",
+                            timer: 2000,
+                            showConfirmButton: false,
+                        });
+                    })
+                    .catch(() => {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Erro ao copiar",
+                            text: "Não foi possível copiar o conteúdo para a área de transferência.",
+                        });
+                    });
+            },
+            error: function () {
+                alert("Erro ao carregar conteúdo do arquivo JSON.");
+            },
+        });
+    });
+});
 
     let myDropzone = new Dropzone("#upload-form", {
         url: "/upload", // endpoint

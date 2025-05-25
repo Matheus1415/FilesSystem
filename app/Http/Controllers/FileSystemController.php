@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class FileSystemController extends Controller
 {
@@ -14,7 +15,7 @@ class FileSystemController extends Controller
         $data = [];
         $rootFiles = Storage::disk('public')->files('');
         $countFileMain = count($rootFiles);
-        
+
         foreach ($directories as $directory) {
             $files = Storage::disk('public')->files($directory);
 
@@ -194,31 +195,29 @@ class FileSystemController extends Controller
         ], $code);
     }
 
-
     public function deleteDirectory(Request $request)
     {
         $message = '';
         $status = '';
-        $code = '';
+        $code = 200;
         $data = "";
 
         try {
-            $directory = $request->input('directorie', '');
+            $directory = $request->path;
 
             if (!Storage::disk('public')->exists($directory)) {
                 $message = "Diretório '$directory' não encontrado.";
                 $status = "Not Found";
                 $code = 404;
             } else {
-                Storage::deleteDirectory($directory);
-                $message = "A pasta $directory foi deletada com sucesso.";
+                Storage::disk('public')->deleteDirectory($directory);
+                $message = "A pasta '$directory' foi deletada com sucesso.";
                 $status = "Deleted";
-                $code = 201;
-                $data = '';
+                $code = 200;
             }
 
         } catch (\Exception $e) {
-            $message = "Erro ao salvar o arquivo.";
+            $message = "Erro ao deletar a pasta.";
             $status = "Error";
             $code = 500;
         }
@@ -229,6 +228,8 @@ class FileSystemController extends Controller
             'data' => $data,
         ], $code);
     }
+
+
     public function deleteFile(Request $request)
     {
         $path = $request->input('path');
@@ -288,4 +289,45 @@ class FileSystemController extends Controller
         ], 200);
     }
 
+    public function downloadFile(Request $request)
+    {
+        $filePath = $request->path;
+        if (empty($filePath) || Str::contains($filePath, ['..', './', '\\'])) {
+            return response()->json([
+                'message' => 'Caminho inválido ou não especificado.',
+                'status' => 'Invalid',
+            ], 400);
+        }
+
+        if (!Storage::disk('public')->exists($filePath)) {
+            return response()->json([
+                'message' => "Arquivo '$filePath' não encontrado.",
+                'status' => 'Not Found',
+            ], 404);
+        }
+
+        $fullPath = Storage::disk('public')->path($filePath);
+        return response()->download($fullPath);
+    }
+
+    public function getJsonContent(Request $request)
+    {
+        $path = $request->query('path');
+
+        if (empty($path) || Str::contains($path, ['..', './'])) {
+            return response()->json(['message' => 'Caminho inválido.'], 400);
+        }
+
+        if (!Storage::disk('public')->exists($path)) {
+            return response()->json(['message' => 'Arquivo não encontrado.'], 404);
+        }
+
+        $content = Storage::disk('public')->get($path);
+
+        try {
+            return response()->json(json_decode($content, true));
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Conteúdo JSON inválido.'], 422);
+        }
+    }
 }
