@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class FileSystemController extends Controller
 {
@@ -262,5 +263,48 @@ class FileSystemController extends Controller
             ], 500);
         }
     }
+
+    public function downloadFile(Request $request)
+    {
+        $filePath = $request->path;
+        if (empty($filePath) || Str::contains($filePath, ['..', './', '\\'])) {
+            return response()->json([
+                'message' => 'Caminho inválido ou não especificado.',
+                'status' => 'Invalid',
+            ], 400);
+        }
+
+        if (!Storage::disk('public')->exists($filePath)) {
+            return response()->json([
+                'message' => "Arquivo '$filePath' não encontrado.",
+                'status' => 'Not Found',
+            ], 404);
+        }
+
+        $fullPath = Storage::disk('public')->path($filePath);
+        return response()->download($fullPath);
+    }
+
+    public function getJsonContent(Request $request)
+    {
+        $path = $request->query('path');
+
+        if (empty($path) || Str::contains($path, ['..', './'])) {
+            return response()->json(['message' => 'Caminho inválido.'], 400);
+        }
+
+        if (!Storage::disk('public')->exists($path)) {
+            return response()->json(['message' => 'Arquivo não encontrado.'], 404);
+        }
+
+        $content = Storage::disk('public')->get($path);
+
+        try {
+            return response()->json(json_decode($content, true));
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Conteúdo JSON inválido.'], 422);
+        }
+    }
+
 
 }

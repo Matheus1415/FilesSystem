@@ -85,25 +85,38 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     if (row.type === "folder") {
                         return `
-                        <button data-path="${row.path}" class="delete-btn-folder text-red-500 hover:text-red-700" title="Excluir">
-                            <i class="icon-x"></i>
-                        </button>
-                        <button data-pathfolder="${row.path}" class="folder-select text-blue-500 hover:text-blue-700">
-                            <i class="icon-arrow-right"></i>
-                        </button>
-                    `;
+                            <button data-path="${row.path}" class="delete-btn-folder text-red-500 hover:text-red-700" title="Excluir">
+                                <i class="icon-x"></i>
+                            </button>
+                            <button data-pathfolder="${row.path}" class="folder-select text-blue-500 hover:text-blue-700">
+                                <i class="icon-arrow-right"></i>
+                            </button>
+                        `;
                     }
 
-                    return `
-                    <div class="flex gap-2">
+                    let buttons = `
                         <button data-path="${row.path}" class="delete-btn-file text-red-500 hover:text-red-700" title="Excluir">
                             <i class="icon-x"></i>
                         </button>
-                        <button data-path="${row.path}" class="edit-btn text-blue-500 hover:text-blue-700" title="Editar">
-                            <i class="icon-pencil"></i>
-                        </button>
-                    </div>
-                `;
+                    `;
+
+                    if (row.type !== "json") {
+                        buttons += `
+                            <button data-path="${row.path}" class="download-btn-file text-blue-500 hover:text-blue-700" title="Download">
+                                <i class="icon-download"></i>
+                            </button>
+                        `;
+                    }
+
+                    if (row.type === "json") {
+                        buttons += `
+                            <button data-path="${row.path}" class="copy-json-btn text-green-500 hover:text-green-700" title="Copiar conteúdo JSON">
+                                <i class="icon-copy"></i>
+                            </button>
+                        `;
+                    }
+
+                    return `<div class="flex gap-2">${buttons}</div>`;
                 },
             },
         ],
@@ -206,7 +219,7 @@ $(document).ready(function () {
         });
     });
 
-    $(document).on("click", ".delete-btn-file", function () {   
+    $(document).on("click", ".delete-btn-file", function () {
         const path = $(this).data("path");
 
         Swal.fire({
@@ -327,6 +340,87 @@ $(document).ready(function () {
                     },
                 });
             }
+        });
+    });
+
+    $(document).on("click", ".download-btn-file", function () {
+        const path = $(this).data("path");
+
+        $.ajax({
+            url: "/download/file",
+            method: "GET",
+            data: {
+                path,
+            },
+            xhrFields: {
+                responseType: "blob",
+            },
+            success: function (blob, status, xhr) {
+                let filename = "";
+                const disposition = xhr.getResponseHeader(
+                    "Content-Disposition"
+                );
+                if (disposition && disposition.indexOf("attachment") !== -1) {
+                    const filenameRegex =
+                        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    const matches = filenameRegex.exec(disposition);
+                    if (matches != null && matches[1]) {
+                        filename = matches[1].replace(/['"]/g, "");
+                    }
+                }
+                if (!filename) filename = "downloaded_file";
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            },
+            error: function (xhr) {
+                let errMsg = "Erro ao baixar arquivo.";
+                try {
+                    const res = JSON.parse(xhr.responseText);
+                    if (res.message) errMsg = res.message;
+                } catch {}
+                alert(errMsg);
+            },
+        });
+    });
+
+    $(document).on("click", ".copy-json-btn", function () {
+        const path = $(this).data("path");
+
+        $.ajax({
+            url: "/json-content",
+            method: "GET",
+            data: { path },
+            success: function (response) {
+                navigator.clipboard
+                    .writeText(JSON.stringify(response, null, 2))
+                    .then(() => {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Conteúdo copiado!",
+                            text: "O conteúdo do arquivo JSON foi copiado para a área de transferência.",
+                            timer: 2000,
+                            showConfirmButton: false,
+                        });
+                    })
+                    .catch(() => {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Erro ao copiar",
+                            text: "Não foi possível copiar o conteúdo para a área de transferência.",
+                        });
+                    });
+            },
+            error: function () {
+                alert("Erro ao carregar conteúdo do arquivo JSON.");
+            },
         });
     });
 });
