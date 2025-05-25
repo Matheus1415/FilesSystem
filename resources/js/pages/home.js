@@ -2,21 +2,38 @@ import $ from "jquery";
 import DataTable from "datatables.net";
 
 $(document).ready(function () {
-    $("#myTable").DataTable({
+    const table = $("#myTable").DataTable({
         ajax: {
             url: "/list/directorie",
             dataSrc: function (json) {
-                return json.data.arquivos;
+                return json?.data || [];
             },
         },
         columns: [
-            { data: "name", title: "Nome" },
-            { data: "data", title: "Data", defaultContent: "—" },
+            {
+                data: "name",
+                title: "Nome",
+                render: function (data, type, row) {
+                    const icon =
+                        row.type === "folder"
+                            ? '<i class="icon-folder text-yellow-500 mr-2"></i>'
+                            : '<i class="icon-file text-gray-500 mr-2"></i>';
+                    return `${icon}<span>${data}</span>`;
+                },
+            },
+            {
+                data: "last_modified",
+                title: "Data",
+                defaultContent: "—",
+                render: function (data, type, row) {
+                    return row.type === "file" ? data : "—";
+                },
+            },
             {
                 data: "size_kb",
                 title: "Tamanho",
-                render: function (data) {
-                    return data ? data + "kb" : "—";
+                render: function (data, type, row) {
+                    return row.type === "file" && data ? `${data}kb` : "—";
                 },
             },
             {
@@ -25,14 +42,24 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
+                    if (row.type === "folder") {
+                        return `
+                            <button data-path="${row.path}" class="open-folder-btn text-blue-500 hover:text-blue-700">
+                                <i class="icon-arrow-right"></i>
+                            </button>
+                        `;
+                    }
+
                     return `
-            <button class="h-4 w-4 font-semibold cursor-pointer text-red-500" title="Excluir">
-              <i class="icon-x"></i>
-            </button>
-            <button class="h-4 w-4 font-semibold cursor-pointer text-blue-500" title="Editar">
-              <i class="icon-pencil"></i>
-            </button>
-          `;
+                        <div class="flex gap-2">
+                            <button data-path="${row.path}" class="delete-btn-file text-red-500 hover:text-red-700" title="Excluir">
+                                <i class="icon-x"></i>
+                            </button>
+                            <button data-path="${row.path}" class="edit-btn text-blue-500 hover:text-blue-700" title="Editar">
+                                <i class="icon-pencil"></i>
+                            </button>
+                        </div>
+                    `;
                 },
             },
         ],
@@ -47,5 +74,120 @@ $(document).ready(function () {
             },
         },
         order: [[0, "asc"]],
+    });
+
+    $(document).on("click", ".add-text", function () {
+        $.ajax({
+            url: "/create/text",
+            method: "GET",
+            success: function (response) {
+                if (response.status === "Duplicated") {
+                    Swal.fire({
+                        title: "Documento Duplicado",
+                        text: response.message,
+                        icon: "warning",
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Documento Criado",
+                        text: response.message,
+                        icon: "success",
+                    });
+
+                    table.ajax.reload(null, false);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(
+                    "Erro na requisição:",
+                    xhr.responseJSON?.message || error
+                );
+            },
+        });
+    });
+
+    $(document).on("click", ".add-json", function () {
+        $.ajax({
+            url: "/create/json",
+            method: "GET",
+            success: function (response) {
+                if (response.status === "Duplicated") {
+                    Swal.fire({
+                        title: "Documento Duplicado",
+                        text: response.message,
+                        icon: "warning",
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Documento Criado",
+                        text: response.message,
+                        icon: "success",
+                    });
+
+                    table.ajax.reload(null, false);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error(
+                    "Erro na requisição:",
+                    xhr.responseJSON?.message || error
+                );
+            },
+        });
+    });
+
+    $(document).on("click", ".delete-btn-file", function () {
+        const path = $(this).data("path"); // pegando o path do botão
+        console.log(path);
+
+        Swal.fire({
+            title: "Tem certeza?",
+            text: `Deseja realmente deletar o arquivo "${path}"?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, deletar!",
+            cancelButtonText: "Cancelar",
+        }).then((result) => {
+            const path = $(this).data("path");
+
+            let formData = new FormData();
+            formData.append("path", path);
+            formData.append(
+                "_token",
+                $('meta[name="csrf-token"]').attr("content")
+            );
+
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/delete/file",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        Swal.fire({
+                            title:
+                                response.status === "Deleted"
+                                    ? "Arquivo Excluído"
+                                    : "Erro",
+                            text: response.message,
+                            icon:
+                                response.status === "Deleted"
+                                    ? "success"
+                                    : "error",
+                        });
+                        if (response.status === "Deleted") {
+                            table.ajax.reload(null, false);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(
+                            "Erro na requisição:",
+                            xhr.responseJSON?.message || xhr.statusText
+                        );
+                    },
+                });
+            }
+        });
     });
 });

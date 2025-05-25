@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,13 +34,13 @@ class FileSystemController extends Controller
 
         try {
             $fileName = 'example01.txt';
-            $path = "texts/$fileName";
+            $path = "$fileName";
 
 
             if (Storage::disk('public')->exists($path)) {
                 $message = "Documento $fileName já existe.";
                 $status = "Duplicated";
-                $code = 409;
+                $code = 200;
             } else {
                 $content = "Esse é o exemplo 01....\n\nAqui temos mais conteúdo para o arquivo.\nVocê pode adicionar múltiplas linhas, texto explicativo, ou qualquer informação que quiser.\n\nLaravel facilita muito o armazenamento de arquivos!";
                 Storage::disk('public')->put($path, $content);
@@ -72,12 +73,12 @@ class FileSystemController extends Controller
 
         try {
             $fileName = 'data01.json';
-            $path = "json/$fileName";
+            $path = "$fileName";
 
             if (Storage::disk('public')->exists($path)) {
                 $message = "Arquivo $fileName já existe.";
                 $status = "Duplicated";
-                $code = 409;
+                $code = 200;
             } else {
                 $json = [
                     ['name' => "João", 'email' => "joao@gmail.com"],
@@ -122,7 +123,7 @@ class FileSystemController extends Controller
     {
         $message = '';
         $status = '';
-        $code = '';
+        $code = 200;
         $data = [];
 
         try {
@@ -133,32 +134,35 @@ class FileSystemController extends Controller
                 $status = "Not Found";
                 $code = 404;
             } else {
-                $subdirectories = Storage::disk('public')->directories($directory);
+                Carbon::setLocale('pt_BR');
+
+                $folders = Storage::disk('public')->directories($directory);
                 $files = Storage::disk('public')->files($directory);
-                $fileData = array_map(function ($file) {
-                    return [
+
+                // Mapear diretórios
+                foreach ($folders as $folder) {
+                    $data[] = [
+                        'name' => basename($folder),
+                        'path' => $folder,
+                        'type' => 'folder',
+                        'size_kb' => null,
+                        'last_modified' => null,
+                    ];
+                }
+
+                // Mapear arquivos
+                foreach ($files as $file) {
+                    $data[] = [
                         'name' => basename($file),
-                        'size_kb' => round(Storage::disk('public')->size($file) / 1024, 2),
                         'path' => $file,
+                        'type' => 'file',
+                        'size_kb' => round(Storage::disk('public')->size($file) / 1024, 2),
+                        'last_modified' => Carbon::createFromTimestamp(Storage::disk('public')->lastModified($file))->diffForHumans(),
                     ];
-                }, $files);
-
-                $directoryData = array_map(function ($dir) {
-                    return [
-                        'name' => basename($dir),
-                        'path' => $dir,
-                    ];
-                }, $subdirectories);
-
-                $data = [
-                    'pasta' => $directory === '' ? '/' : $directory,
-                    'subpastas' => $directoryData,
-                    'arquivos' => $fileData,
-                ];
+                }
 
                 $message = "Conteúdo do diretório '$directory'.";
                 $status = "Success";
-                $code = 200;
             }
         } catch (\Exception $e) {
             $message = "Erro ao listar arquivos e pastas.";
@@ -172,6 +176,7 @@ class FileSystemController extends Controller
             'data' => $data,
         ], $code);
     }
+
 
     public function filterDocumentOfDirectory(Request $request)
     {
@@ -275,6 +280,39 @@ class FileSystemController extends Controller
             'status' => $status,
             'data' => $data,
         ], $code);
+    }
+    public function deleteFile(Request $request)
+    {
+        $path = $request->input('path');
+
+        if (!$path) {
+            return response()->json([
+                'message' => 'Caminho do arquivo não fornecido.',
+                'status' => 'Error',
+            ], 400);
+        }
+
+        try {
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+
+                return response()->json([
+                    'message' => "Arquivo '$path' deletado com sucesso.",
+                    'status' => 'Deleted',
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => "Arquivo '$path' não encontrado.",
+                    'status' => 'Not Found',
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Erro ao deletar o arquivo.',
+                'status' => 'Error',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 }
