@@ -33,13 +33,9 @@
                     </h3>
                     
                     <div class="grid grid-cols-3 gap-2">
-                        <div class="border-1 border-frost/50 rounded-md flex items-center p-2 gap-2 text-frost hover:bg-frost/5 transition-all">
-                            <i class="icon-folder"></i>
-                            <span class="grow truncate">Miami asdasa sdas asad 2022</span>
-                            <span>22</span>
-                        </div>
-
+                        
                         <x-folder-button folderName='daniel' fileAmount='22'/>
+                        <x-folder-button folderName='daniel ativo' fileAmount='22' isActive class="active"/>
                         <x-folder-button folderName='daniel' fileAmount='22'/>
                         <x-folder-button folderName='daniel' fileAmount='22'/>
                         <x-folder-button folderName='daniel' fileAmount='22'/>
