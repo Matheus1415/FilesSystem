@@ -468,7 +468,8 @@ $(document).ready(function () {
             }
         });
     });
-});
+
+    
 
     // --- Daniel --- //
 
@@ -551,6 +552,5 @@ $(document).ready(function () {
             confirmButtonText: "Certo",
         })
     });
-
 
 });
