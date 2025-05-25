@@ -1,13 +1,18 @@
-import $ from 'jquery';
-import DataTable from 'datatables.net';
+import $ from "jquery";
+import DataTable from "datatables.net";
 import Dropzone from "dropzone";
 
 $(document).ready(function () {
+    let folderSelect = "/";
+
     const table = $("#myTable").DataTable({
         ajax: {
             url: "/list/directorie",
             dataSrc: function (json) {
                 return json?.data || [];
+            },
+            data: function (d) {
+                d.directory = folderSelect;
             },
         },
         columns: [
@@ -75,22 +80,22 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     if (row.type === "folder") {
                         return `
-                            <button data-path="${row.path}" class="open-folder-btn text-blue-500 hover:text-blue-700">
-                                <i class="icon-arrow-right"></i>
-                            </button>
-                        `;
+                        <button data-pathfolder="${row.path}" class="folder-select text-blue-500 hover:text-blue-700">
+                            <i class="icon-arrow-right"></i>
+                        </button>
+                    `;
                     }
 
                     return `
-                        <div class="flex gap-2">
-                            <button data-path="${row.path}" class="delete-btn-file text-red-500 hover:text-red-700" title="Excluir">
-                                <i class="icon-x"></i>
-                            </button>
-                            <button data-path="${row.path}" class="edit-btn text-blue-500 hover:text-blue-700" title="Editar">
-                                <i class="icon-pencil"></i>
-                            </button>
-                        </div>
-                    `;
+                    <div class="flex gap-2">
+                        <button data-path="${row.path}" class="delete-btn-file text-red-500 hover:text-red-700" title="Excluir">
+                            <i class="icon-x"></i>
+                        </button>
+                        <button data-path="${row.path}" class="edit-btn text-blue-500 hover:text-blue-700" title="Editar">
+                            <i class="icon-pencil"></i>
+                        </button>
+                    </div>
+                `;
                 },
             },
         ],
@@ -105,6 +110,32 @@ $(document).ready(function () {
             },
         },
         order: [[0, "asc"]],
+    });
+
+    $(document).on("click", ".folder-select", function () {
+        const path = $(this).data("pathfolder");
+        $(".folder-select")
+            .removeClass(
+                "border-primary bg-primary text-background-foreground hover:bg-primary/90"
+            )
+            .addClass("text-frost hover:bg-frost/5");
+        let selectedFolderId = $("#" + CSS.escape(path));
+        if (selectedFolderId.length > 0) {
+            selectedFolderId
+                .addClass(
+                    "border-primary bg-primary text-background-foreground hover:bg-primary/90"
+                )
+                .removeClass("text-frost");
+        }
+
+        $(this)
+            .addClass(
+                "border-primary bg-primary text-background-foreground hover:bg-primary/90"
+            )
+            .removeClass("text-frost");
+
+        folderSelect = path;
+        table.ajax.reload(null, false);
     });
 
     $(document).on("click", ".add-text", function () {
@@ -224,21 +255,21 @@ $(document).ready(function () {
 });
 
 let myDropzone = new Dropzone("#upload-form", {
-    url: "/upload",               // endpoint
-    maxFiles: 5,                  // limite de arquivos
-    maxFilesize: 1,               // MB
-    acceptedFiles: 'image/*',     // tipos aceitos
+    url: "/upload", // endpoint
+    maxFiles: 5, // limite de arquivos
+    maxFilesize: 1, // MB
+    acceptedFiles: "image/*", // tipos aceitos
     disablePreviews: true,
-    
+
     dictDefaultMessage: null,
     dictRemoveFile: "Remover",
     dictMaxFilesExceeded: "Você só pode enviar até 5 arquivos.",
 });
 
-myDropzone.on("addedfile", file => {
+myDropzone.on("addedfile", (file) => {
     console.log(`File added: ${file.name}`);
 });
 
 $(document).ready(() => {
     console.log(myDropzone);
-})
+});

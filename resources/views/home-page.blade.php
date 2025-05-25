@@ -38,7 +38,8 @@
                         <div class="p-4">
 
                             <form action="/upload-form" id="upload-form" class="dropzone">
-                                <div class="dz-message flex flex-col items-center justify-center border-2 border-dashed border-frost/50 rounded p-8 bg-background-foreground text-frost transition hover:bg-frost/10">
+                                <div
+                                    class="dz-message flex flex-col items-center justify-center border-2 border-dashed border-frost/50 rounded p-8 bg-background-foreground text-frost transition hover:bg-frost/10">
                                     <i class="icon-upload text-5xl mb-4 text-primary"></i>
                                     <span class="text-lg font-bold">Solte os arquivos aqui</span>
                                     <span class="text-sm text-muted">Ou clique para escolher</span>
@@ -56,8 +57,10 @@
                     </h3>
 
                     <div class="grid grid-cols-3 gap-2">
+                        <x-folder-button class="foldrs-select" folderName="Main"
+                            data-pathfolder="/" filesAmount="{{$countFileMain}}" />
                         @foreach ($directories as $directorie)
-                            <x-folder-button folderName="{{ $directorie['directory'] }}"
+                            <x-folder-button id="{{ $directorie['directory'] }}" class="foldrs-select" folderName="{{ $directorie['directory'] }}"
                                 data-pathfolder="{{ $directorie['directory'] }}"
                                 filesAmount="{{ $directorie['countFile'] }}" />
                         @endforeach

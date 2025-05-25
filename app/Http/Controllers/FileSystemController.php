@@ -12,6 +12,9 @@ class FileSystemController extends Controller
     {
         $directories = Storage::disk('public')->directories();
         $data = [];
+        $rootFiles = Storage::disk('public')->files('');
+        $countFileMain = count($rootFiles);
+        
         foreach ($directories as $directory) {
             $files = Storage::disk('public')->files($directory);
 
@@ -21,7 +24,8 @@ class FileSystemController extends Controller
             ];
         }
         return view('home-page', [
-            'directories' => $data
+            'directories' => $data,
+            'countFileMain' => $countFileMain,
         ]);
     }
 
@@ -129,7 +133,7 @@ class FileSystemController extends Controller
         try {
             $directory = $request->input('directory', '');
 
-            if (!Storage::disk('public')->exists($directory)) {
+            if ($directory !== '' && !Storage::disk('public')->exists($directory)) {
                 $message = "Diretório '$directory' não encontrado.";
                 $status = "Not Found";
                 $code = 404;
@@ -163,8 +167,6 @@ class FileSystemController extends Controller
                         $type = 'json';
                     } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm', 'mpeg'])) {
                         $type = 'video';
-                    } else {
-                        $type = 'other';
                     }
 
                     $data[] = [
@@ -175,7 +177,6 @@ class FileSystemController extends Controller
                         'last_modified' => Carbon::createFromTimestamp(Storage::disk('public')->lastModified($file))->diffForHumans(),
                     ];
                 }
-
 
                 $message = "Conteúdo do diretório '$directory'.";
                 $status = "Success";
@@ -193,75 +194,6 @@ class FileSystemController extends Controller
         ], $code);
     }
 
-
-    public function filterDocumentOfDirectory(Request $request)
-    {
-        $message = '';
-        $status = '';
-        $code = '';
-        $data = [];
-
-        try {
-            $directory = $request->input('directorie', '');
-            $filter = $request->input('filter', '');
-
-            if (!Storage::disk('public')->exists($directory)) {
-                $message = "Diretório '$directory' não encontrado.";
-                $status = "Not Found";
-                $code = 404;
-            } else {
-                // Subpastas imediatas
-                $subdirectories = Storage::disk('public')->directories($directory);
-
-                // Aplica filtro se fornecido
-                $filteredDirs = array_filter($subdirectories, function ($dir) use ($filter) {
-                    return !$filter || str_contains(basename($dir), $filter);
-                });
-
-                $directoryData = array_map(function ($dir) {
-                    return [
-                        'name' => basename($dir),
-                        'path' => $dir,
-                    ];
-                }, $filteredDirs);
-
-                // Arquivos imediatos
-                $files = Storage::disk('public')->files($directory);
-
-                $filteredFiles = array_filter($files, function ($file) use ($filter) {
-                    return !$filter || str_contains(basename($file), $filter);
-                });
-
-                $fileData = array_map(function ($file) {
-                    return [
-                        'name' => basename($file),
-                        'size_kb' => round(Storage::disk('public')->size($file) / 1024, 2),
-                        'path' => $file,
-                    ];
-                }, $filteredFiles);
-
-                $data = [
-                    'pasta' => $directory === '' ? '/' : $directory,
-                    'subpastas' => $directoryData,
-                    'arquivos' => $fileData,
-                ];
-
-                $message = "Conteúdo do diretório '$directory' filtrado por '$filter'.";
-                $status = "Success";
-                $code = 200;
-            }
-        } catch (\Exception $e) {
-            $message = "Erro ao listar arquivos e pastas.";
-            $status = "Error";
-            $code = 500;
-        }
-
-        return response()->json([
-            'message' => $message,
-            'status' => $status,
-            'data' => $data,
-        ], $code);
-    }
 
     public function deleteDirectory(Request $request)
     {
