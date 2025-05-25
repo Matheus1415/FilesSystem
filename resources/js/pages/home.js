@@ -86,27 +86,6 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     if (row.type === "folder") {
                         return `
-<<<<<<< HEAD
-                        <button data-path="${row.path}" class="delete-btn-folder text-red-500 hover:text-red-700" title="Excluir">
-                            <i class="icon-x"></i>
-                        </button>
-                        <button data-pathfolder="${row.path}" class="folder-select text-blue-500 hover:text-blue-700">
-                            <i class="icon-arrow-right"></i>
-                        </button>
-                    `;
-                    }
-
-                    return `
-                    <div class="flex gap-2">
-                        <button data-path="${row.path}" class="delete-btn-file text-red-500 hover:text-red-700" title="Excluir">
-                            <i class="icon-x"></i>
-                        </button>
-                        <button data-path="${row.path}" class="edit-btn text-blue-500 hover:text-blue-700" title="Editar">
-                            <i class="icon-pencil"></i>
-                        </button>
-                    </div>
-                `;
-=======
                             <button data-path="${row.path}" class="delete-btn-folder text-red-500 hover:text-red-700" title="Excluir">
                                 <i class="icon-x"></i>
                             </button>
@@ -139,7 +118,6 @@ $(document).ready(function () {
                     }
 
                     return `<div class="flex gap-2">${buttons}</div>`;
->>>>>>> f849da5102e35a197c4d755623b1514b6eeca221
                 },
             },
         ],
@@ -302,146 +280,6 @@ $(document).ready(function () {
             }
         });
     });
-<<<<<<< HEAD
-
-    $(document).on("click", ".delete-btn-folder", function () {
-        const path = $(this).data("path");
-
-        Swal.fire({
-            title: "Tem certeza?",
-            text: `Deseja realmente deletar a pasta "${path}"?`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sim, deletar!",
-            cancelButtonText: "Cancelar",
-        }).then((result) => {
-            const path = $(this).data("path");
-
-            let formData = new FormData();
-            formData.append("path", path);
-            formData.append(
-                "_token",
-                $('meta[name="csrf-token"]').attr("content")
-            );
-
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "/delete/directorie",
-                    method: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        Swal.fire({
-                            title:
-                                response.status === "Deleted"
-                                    ? "Arquivo Excluído"
-                                    : "Erro",
-                            text: response.message,
-                            icon:
-                                response.status === "Deleted"
-                                    ? "success"
-                                    : "error",
-                        });
-                        if (response.status === "Deleted") {
-                            table.ajax.reload(null, false);
-                        }
-                    },
-                    error: function (xhr) {
-                        console.error(
-                            "Erro na requisição:",
-                            xhr.responseJSON?.message || xhr.statusText
-                        );
-                    },
-                });
-            }
-        });
-    });
-
-
-    // --- Daniel --- //
-
-
-
-    let myDropzone = new Dropzone("#upload-form", {
-        url: "/upload", // endpoint
-        autoProcessQueue: false, // impede o envio automático
-        maxFiles: 1, // limite de arquivos
-        maxFilesize: 10, // MB
-        // acceptedFiles: "image/*", // tipos aceitos
-        disablePreviews: true,
-    
-        dictDefaultMessage: null,
-        dictRemoveFile: "Remover",
-        dictMaxFilesExceeded: "Você só pode enviar até 5 arquivos.",
-    
-    });
-    
-    
-    myDropzone.on("addedfile", function (file) {
-        const formData = new FormData();
-    
-        formData.append("file", file, file.name);
-    
-        formData.append("path", folderSelect);
-    
-        formData.append(
-            "_token",
-            $('meta[name="csrf-token"]').attr("content")
-        );
-    
-        $.ajax({
-            url: '/upload/file',
-            method: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-    
-            success: function (response) {
-                Swal.fire({
-                    title:
-                        response.status === "Deleted"
-                            ? "Arquivo Excluído"
-                            : "Erro",
-                    text: response.message,
-                    icon:
-                        response.status === "Deleted"
-                            ? "success"
-                            : "error",
-                });
-                if (response.status === "Deleted") {
-                    table.ajax.reload(null, false);
-                }
-            },
-
-            error: function (xhr) {
-                console.error(
-                    "Erro na requisição:",
-                    xhr.responseJSON?.message || xhr.statusText
-                );
-            },
-        })
-    });
-    
-    myDropzone.on("success", file => {
-        Swal.fire({
-            title: "Arquivo enviado com sucesso|",
-            text: `O arquivo "${file.name}" foi enviado com sucesso.`,
-            icon: "success",
-            confirmButtonText: "Certo",
-        })
-    });
-    
-    myDropzone.on("error", file => {
-        Swal.fire({
-            title: "Erro ao enviar arquivo",
-            text: `Não foi possivel enviar o arquivo "${file.name}".`,
-            icon: "warning",
-            confirmButtonText: "Certo",
-        })
-    });
-});
-=======
 
     $(document).on("click", ".delete-btn-folder", function () {
         const path = $(this).data("path");
@@ -606,4 +444,3 @@ myDropzone.on("addedfile", (file) => {
 $(document).ready(() => {
     console.log(myDropzone);
 });
->>>>>>> f849da5102e35a197c4d755623b1514b6eeca221
