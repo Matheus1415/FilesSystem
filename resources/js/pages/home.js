@@ -1,12 +1,8 @@
 import $ from "jquery";
 import DataTable from "datatables.net";
-import $ from "jquery";
-import DataTable from "datatables.net";
 import Dropzone from "dropzone";
 
 $(document).ready(function () {
-    let folderSelect = "/";
-
     let folderSelect = "/";
 
     const table = $("#myTable").DataTable({
@@ -15,9 +11,6 @@ $(document).ready(function () {
             url: "/list/directorie",
             dataSrc: function (json) {
                 return json?.data || [];
-            },
-            data: function (d) {
-                d.directory = folderSelect;
             },
             data: function (d) {
                 d.directory = folderSelect;
@@ -68,14 +61,7 @@ $(document).ready(function () {
             {
                 data: "size_kb",
                 title: "Tamanho",
-                data: "size_kb",
-                title: "Tamanho",
                 render: function (data, type, row) {
-                    if (data == null) {
-                        return "-";
-                    } else {
-                        return `${data}kb`;
-                    }
                     if (data == null) {
                         return "-";
                     } else {
@@ -87,9 +73,6 @@ $(document).ready(function () {
                 data: "size_kb",
                 title: "Tamanho",
                 render: function (data, type, row) {
-                    return row.type === "file" && data
-                        ? `${data.size_kb}kb`
-                        : "—";
                     return row.type === "file" && data
                         ? `${data.size_kb}kb`
                         : "—";
@@ -103,6 +86,7 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     if (row.type === "folder") {
                         return `
+<<<<<<< HEAD
                         <button data-path="${row.path}" class="delete-btn-folder text-red-500 hover:text-red-700" title="Excluir">
                             <i class="icon-x"></i>
                         </button>
@@ -110,6 +94,26 @@ $(document).ready(function () {
                             <i class="icon-arrow-right"></i>
                         </button>
                     `;
+                    }
+
+                    return `
+                    <div class="flex gap-2">
+                        <button data-path="${row.path}" class="delete-btn-file text-red-500 hover:text-red-700" title="Excluir">
+                            <i class="icon-x"></i>
+                        </button>
+                        <button data-path="${row.path}" class="edit-btn text-blue-500 hover:text-blue-700" title="Editar">
+                            <i class="icon-pencil"></i>
+                        </button>
+                    </div>
+                `;
+=======
+                            <button data-path="${row.path}" class="delete-btn-folder text-red-500 hover:text-red-700" title="Excluir">
+                                <i class="icon-x"></i>
+                            </button>
+                            <button data-pathfolder="${row.path}" class="folder-select text-blue-500 hover:text-blue-700">
+                                <i class="icon-arrow-right"></i>
+                            </button>
+                        `;
                     }
 
                     let buttons = `
@@ -135,6 +139,7 @@ $(document).ready(function () {
                     }
 
                     return `<div class="flex gap-2">${buttons}</div>`;
+>>>>>>> f849da5102e35a197c4d755623b1514b6eeca221
                 },
             },
         ],
@@ -148,32 +153,6 @@ $(document).ready(function () {
             },
         },
         order: [[0, "asc"]],
-    });
-
-    $(document).on("click", ".folder-select", function () {
-        const path = $(this).data("pathfolder");
-        $(".folder-select")
-            .removeClass(
-                "border-primary bg-primary text-background-foreground hover:bg-primary/90"
-            )
-            .addClass("text-frost hover:bg-frost/5");
-        let selectedFolderId = $("#" + CSS.escape(path));
-        if (selectedFolderId.length > 0) {
-            selectedFolderId
-                .addClass(
-                    "border-primary bg-primary text-background-foreground hover:bg-primary/90"
-                )
-                .removeClass("text-frost");
-        }
-
-        $(this)
-            .addClass(
-                "border-primary bg-primary text-background-foreground hover:bg-primary/90"
-            )
-            .removeClass("text-frost");
-
-        folderSelect = path;
-        table.ajax.reload(null, false);
     });
 
     $(document).on("click", ".folder-select", function () {
@@ -264,7 +243,6 @@ $(document).ready(function () {
 
     $(document).on("click", ".delete-btn-file", function () {
         const path = $(this).data("path");
-        const path = $(this).data("path");
 
         Swal.fire({
             title: "Tem certeza?",
@@ -324,6 +302,146 @@ $(document).ready(function () {
             }
         });
     });
+<<<<<<< HEAD
+
+    $(document).on("click", ".delete-btn-folder", function () {
+        const path = $(this).data("path");
+
+        Swal.fire({
+            title: "Tem certeza?",
+            text: `Deseja realmente deletar a pasta "${path}"?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, deletar!",
+            cancelButtonText: "Cancelar",
+        }).then((result) => {
+            const path = $(this).data("path");
+
+            let formData = new FormData();
+            formData.append("path", path);
+            formData.append(
+                "_token",
+                $('meta[name="csrf-token"]').attr("content")
+            );
+
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "/delete/directorie",
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        Swal.fire({
+                            title:
+                                response.status === "Deleted"
+                                    ? "Arquivo Excluído"
+                                    : "Erro",
+                            text: response.message,
+                            icon:
+                                response.status === "Deleted"
+                                    ? "success"
+                                    : "error",
+                        });
+                        if (response.status === "Deleted") {
+                            table.ajax.reload(null, false);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(
+                            "Erro na requisição:",
+                            xhr.responseJSON?.message || xhr.statusText
+                        );
+                    },
+                });
+            }
+        });
+    });
+
+
+    // --- Daniel --- //
+
+
+
+    let myDropzone = new Dropzone("#upload-form", {
+        url: "/upload", // endpoint
+        autoProcessQueue: false, // impede o envio automático
+        maxFiles: 1, // limite de arquivos
+        maxFilesize: 10, // MB
+        // acceptedFiles: "image/*", // tipos aceitos
+        disablePreviews: true,
+    
+        dictDefaultMessage: null,
+        dictRemoveFile: "Remover",
+        dictMaxFilesExceeded: "Você só pode enviar até 5 arquivos.",
+    
+    });
+    
+    
+    myDropzone.on("addedfile", function (file) {
+        const formData = new FormData();
+    
+        formData.append("file", file, file.name);
+    
+        formData.append("path", folderSelect);
+    
+        formData.append(
+            "_token",
+            $('meta[name="csrf-token"]').attr("content")
+        );
+    
+        $.ajax({
+            url: '/upload/file',
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+    
+            success: function (response) {
+                Swal.fire({
+                    title:
+                        response.status === "Deleted"
+                            ? "Arquivo Excluído"
+                            : "Erro",
+                    text: response.message,
+                    icon:
+                        response.status === "Deleted"
+                            ? "success"
+                            : "error",
+                });
+                if (response.status === "Deleted") {
+                    table.ajax.reload(null, false);
+                }
+            },
+
+            error: function (xhr) {
+                console.error(
+                    "Erro na requisição:",
+                    xhr.responseJSON?.message || xhr.statusText
+                );
+            },
+        })
+    });
+    
+    myDropzone.on("success", file => {
+        Swal.fire({
+            title: "Arquivo enviado com sucesso|",
+            text: `O arquivo "${file.name}" foi enviado com sucesso.`,
+            icon: "success",
+            confirmButtonText: "Certo",
+        })
+    });
+    
+    myDropzone.on("error", file => {
+        Swal.fire({
+            title: "Erro ao enviar arquivo",
+            text: `Não foi possivel enviar o arquivo "${file.name}".`,
+            icon: "warning",
+            confirmButtonText: "Certo",
+        })
+    });
+});
+=======
 
     $(document).on("click", ".delete-btn-folder", function () {
         const path = $(this).data("path");
@@ -385,66 +503,6 @@ $(document).ready(function () {
                 });
             }
         });
-    });
-
-    $(document).on("click", ".delete-btn-folder", function () {
-        const path = $(this).data("path");
-
-        Swal.fire({
-            title: "Tem certeza?",
-            text: `Deseja realmente deletar a pasta "${path}"?`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sim, deletar!",
-            cancelButtonText: "Cancelar",
-        }).then((result) => {
-            const path = $(this).data("path");
-
-            let formData = new FormData();
-            formData.append("path", path);
-            formData.append(
-                "_token",
-                $('meta[name="csrf-token"]').attr("content")
-            );
-
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "/delete/directorie",
-                    method: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        Swal.fire({
-                            title:
-                                response.status === "Deleted"
-                                    ? "Arquivo Excluído"
-                                    : "Erro",
-                            text: response.message,
-                            icon:
-                                response.status === "Deleted"
-                                    ? "success"
-                                    : "error",
-                        });
-                        if (response.status === "Deleted") {
-                            table.ajax.reload(null, false);
-                        }
-                    },
-                    error: function (xhr) {
-                        console.error(
-                            "Erro na requisição:",
-                            xhr.responseJSON?.message || xhr.statusText
-                        );
-                    },
-                });
-            }
-        });
-    });
-
-
-    // --- Daniel --- //
-
-
     });
 
     $(document).on("click", ".download-btn-file", function () {
@@ -529,81 +587,23 @@ $(document).ready(function () {
     });
 });
 
-    let myDropzone = new Dropzone("#upload-form", {
-        url: "/upload", // endpoint
-        autoProcessQueue: false, // impede o envio automático
-        maxFiles: 1, // limite de arquivos
-        maxFilesize: 10, // MB
-        // acceptedFiles: "image/*", // tipos aceitos
-        disablePreviews: true,
-    
-        dictDefaultMessage: null,
-        dictRemoveFile: "Remover",
-        dictMaxFilesExceeded: "Você só pode enviar até 5 arquivos.",
-    
-    });
-    
-    
-    myDropzone.on("addedfile", function (file) {
-        const formData = new FormData();
-    
-        formData.append("file", file, file.name);
-    
-        formData.append("path", folderSelect);
-    
-        formData.append(
-            "_token",
-            $('meta[name="csrf-token"]').attr("content")
-        );
-    
-        $.ajax({
-            url: '/upload/file',
-            method: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-    
-            success: function (response) {
-                Swal.fire({
-                    title:
-                        response.status === "Deleted"
-                            ? "Arquivo Excluído"
-                            : "Erro",
-                    text: response.message,
-                    icon:
-                        response.status === "Deleted"
-                            ? "success"
-                            : "error",
-                });
-                if (response.status === "Deleted") {
-                    table.ajax.reload(null, false);
-                }
-            },
+let myDropzone = new Dropzone("#upload-form", {
+    url: "/upload", // endpoint
+    maxFiles: 5, // limite de arquivos
+    maxFilesize: 1, // MB
+    acceptedFiles: "image/*", // tipos aceitos
+    disablePreviews: true,
 
-            error: function (xhr) {
-                console.error(
-                    "Erro na requisição:",
-                    xhr.responseJSON?.message || xhr.statusText
-                );
-            },
-        })
-    });
-    
-    myDropzone.on("success", file => {
-        Swal.fire({
-            title: "Arquivo enviado com sucesso|",
-            text: `O arquivo "${file.name}" foi enviado com sucesso.`,
-            icon: "success",
-            confirmButtonText: "Certo",
-        })
-    });
-    
-    myDropzone.on("error", file => {
-        Swal.fire({
-            title: "Erro ao enviar arquivo",
-            text: `Não foi possivel enviar o arquivo "${file.name}".`,
-            icon: "warning",
-            confirmButtonText: "Certo",
-        })
-    });
+    dictDefaultMessage: null,
+    dictRemoveFile: "Remover",
+    dictMaxFilesExceeded: "Você só pode enviar até 5 arquivos.",
 });
+
+myDropzone.on("addedfile", (file) => {
+    console.log(`File added: ${file.name}`);
+});
+
+$(document).ready(() => {
+    console.log(myDropzone);
+});
+>>>>>>> f849da5102e35a197c4d755623b1514b6eeca221
