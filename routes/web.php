@@ -37,3 +37,6 @@ Route::get('/doc',function(){
     $content = Storage::disk('public')->get('text.txt');
     echo $content;
 });
+
+
+Route::view('/daniel', 'home-page');
