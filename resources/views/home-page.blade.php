@@ -41,8 +41,8 @@
                                 <div
                                     class="dz-message flex flex-col items-center justify-center border-2 border-dashed border-frost/50 rounded p-8 bg-background-foreground text-frost transition hover:bg-frost/10">
                                     <i class="icon-upload text-5xl mb-4 text-primary"></i>
-                                    <span class="text-lg font-bold">Solte os arquivos aqui</span>
-                                    <span class="text-sm text-muted">Ou clique para escolher</span>
+                                    <span class="text-lg text-center leading-5 font-bold">Solte os arquivos aqui</span>
+                                    <span class="text-sm text-center leading-4.5 text-muted">Ou clique para escolher</span>
                                 </div>
                             </form>
                         </div>
