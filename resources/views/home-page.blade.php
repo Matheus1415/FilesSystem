@@ -13,7 +13,7 @@
     
                     <div class="bg-primary h-40 mb-2"></div>
     
-                    <div class="flex items-center justify-center gap-4">
+                    <div class="flex flex-col lg:flex-row items-center justify-center gap-x-4 gap-y-2">
                         <x-button icon='icon-search'>
                             Details
                         </x-button>
