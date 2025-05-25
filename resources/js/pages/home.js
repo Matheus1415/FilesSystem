@@ -3,7 +3,7 @@ import DataTable from "datatables.net";
 import Dropzone from "dropzone";
 
 $(document).ready(function () {
-    let folderSelect = "/";
+    var folderSelect = "/";
 
     const table = $("#myTable").DataTable({
         responsive: true,
@@ -41,7 +41,7 @@ $(document).ready(function () {
                             break;
                         case "csv":
                             icon =
-                                '<i class="icon-file-csv text-indigo-500 mr-2"></i>';
+                                '<i class="icon-table text-indigo-500 mr-2"></i>';
                             break;
                         case "json":
                             icon =
@@ -423,6 +423,52 @@ $(document).ready(function () {
             },
         });
     });
+
+    $(document).on("click", ".add-folder", function () {
+        Swal.fire({
+            title: "Criar nova pasta",
+            input: "text",
+            inputLabel: "Nome da nova pasta",
+            inputPlaceholder: "Ex: documentos, relatorios_2025",
+            showCancelButton: true,
+            confirmButtonText: "Criar",
+            cancelButtonText: "Cancelar",
+            inputValidator: (value) => {
+                if (!value) return "Você precisa fornecer um nome!";
+                if (/[\\/:*?"<>|]/.test(value)) return "Nome inválido!";
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const folderName = result.value;
+                $.ajax({
+                    url: "/create/folder",
+                    method: "POST",
+                    data: {
+                        directory: folderSelect,
+                        name: folderName,
+                        _token: $("meta[name='csrf-token']").attr("content"),
+                    },
+                    success: function (response) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Pasta criada",
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false,
+                        });
+
+                        table.ajax.reload(null, false);
+                    },
+                    error: function (xhr) {
+                        const msg =
+                            xhr.responseJSON?.message || "Erro ao criar pasta.";
+                        Swal.fire("Erro", msg, "error");
+                    },
+                });
+            }
+        });
+    });
+});
 
     // --- Daniel --- //
 
