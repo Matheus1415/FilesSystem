@@ -2,7 +2,7 @@
 @import 'lucide-static/font/lucide.css';
 
 
-@import 'datatables.net-dt/css/jquery.dataTables.css';
+@import 'datatables.net-dt/css/dataTables.dataTables.min.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
