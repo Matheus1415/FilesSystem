@@ -158,7 +158,7 @@ class FileSystemController extends Controller
                     $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
                     $type = 'other';
 
-                    if (in_array($extension, ['txt', 'log', 'md', 'xml', 'csv'])) {
+                    if (in_array($extension, ['txt', 'log', 'md',])) {
                         $type = 'text';
                     } elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'])) {
                         $type = 'image';
@@ -168,6 +168,8 @@ class FileSystemController extends Controller
                         $type = 'json';
                     } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm', 'mpeg'])) {
                         $type = 'video';
+                    } elseif (in_array($extension, ['xml', 'csv'])) {
+                        $type = 'csv';
                     }
 
                     $data[] = [
@@ -306,5 +308,33 @@ class FileSystemController extends Controller
         }
     }
 
+    public function createFolder(Request $request)
+    {
+        $directory = $request->input('directory', '');
+        $name = trim($request->input('name', ''));
+
+        if (!$name || preg_match('/[\\\\\/:*?"<>|]/', $name)) {
+            return response()->json([
+                'message' => 'Nome de pasta inválido.',
+                'status' => 'Invalid',
+            ], 400);
+        }
+
+        $fullPath = rtrim($directory, '/') . '/' . $name;
+
+        if (Storage::disk('public')->exists($fullPath)) {
+            return response()->json([
+                'message' => 'Já existe uma pasta com esse nome.',
+                'status' => 'Duplicated',
+            ], 409);
+        }
+
+        Storage::disk('public')->makeDirectory($fullPath);
+
+        return response()->json([
+            'message' => "Pasta '{$name}' criada com sucesso!",
+            'status' => 'Success',
+        ], 201);
+    }
 
 }

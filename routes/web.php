@@ -12,3 +12,4 @@ Route::post('/delete/directorie',[FileSystemController::class,'deleteDirectory']
 Route::post('/delete/file',[FileSystemController::class,'deleteFile'])->name('delete.directorie.file');
 Route::get('/download/file', [FileSystemController::class, 'downloadFile'])->name('download.file');
 Route::get('/json-content', [FileSystemController::class, 'getJsonContent'])->name('read.json');
+Route::post('/create/folder', [FileSystemController::class, 'createFolder'])->name('create.folder');
