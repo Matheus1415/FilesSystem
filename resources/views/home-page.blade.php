@@ -10,11 +10,19 @@
                     Account storage
                 </h3>
 
-                <div class="bg-primary h-40"></div>
+                <div class="bg-primary h-40 mb-2"></div>
 
-                <button>
-                    
-                </button>
+                <div class="flex items-center justify-center gap-4">
+                    <x-button icon='icon-search'>
+                        Details
+                    </x-button>
+
+
+                    <x-button icon='icon-upload' variant='primary'>
+                        Upgrade
+                    </x-button>
+
+                </div>
             </x-card>
             <x-card class="col-span-9">dani</x-card>
         </div>
