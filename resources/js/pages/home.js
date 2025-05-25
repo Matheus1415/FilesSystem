@@ -239,6 +239,20 @@ myDropzone.on("addedfile", file => {
     console.log(`File added: ${file.name}`);
 });
 
-$(document).ready(() => {
-    console.log(myDropzone);
-})
+myDropzone.on("success", file => {
+    Swal.fire({
+        title: "Arquivo enviado com sucesso|",
+        text: `O arquivo "${file.name}" foi enviado com sucesso.`,
+        icon: "success",
+        confirmButtonText: "Certo",
+    })
+});
+
+myDropzone.on("error", file => {
+    Swal.fire({
+        title: "Erro ao enviar arquivo",
+        text: `Não foi possivel enviar o arquivo "${file.name}".`,
+        icon: "warning",
+        confirmButtonText: "Certo",
+    })
+});
