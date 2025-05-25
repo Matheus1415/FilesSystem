@@ -117,7 +117,7 @@ class FileController extends Controller
         echo '<pre>';
         print_r($projectFiles);
 
-        // # Listando arquivos dentro diretorio específico 
+        // # Listando os diretorio  
         $projectFiles = Storage::disk('local')->directories();
         echo "<h4>Listando so diretorio local :</h4>";
         echo '<pre>';
