@@ -22,7 +22,7 @@
                         <x-button icon='icon-upload' variant='primary'>
                             Upgrade
                         </x-button>
-                    </div>
+                    </div>  
                 </x-card>
 
                 <x-card>
