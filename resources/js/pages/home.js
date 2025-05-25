@@ -1,5 +1,6 @@
-import $ from "jquery";
-import DataTable from "datatables.net";
+import $ from 'jquery';
+import DataTable from 'datatables.net';
+import Dropzone from "dropzone";
 
 $(document).ready(function () {
     const table = $("#myTable").DataTable({
@@ -221,3 +222,23 @@ $(document).ready(function () {
         });
     });
 });
+
+let myDropzone = new Dropzone("#upload-form", {
+    url: "/upload",               // endpoint
+    maxFiles: 5,                  // limite de arquivos
+    maxFilesize: 1,               // MB
+    acceptedFiles: 'image/*',     // tipos aceitos
+    disablePreviews: true,
+    
+    dictDefaultMessage: null,
+    dictRemoveFile: "Remover",
+    dictMaxFilesExceeded: "Você só pode enviar até 5 arquivos.",
+});
+
+myDropzone.on("addedfile", file => {
+    console.log(`File added: ${file.name}`);
+});
+
+$(document).ready(() => {
+    console.log(myDropzone);
+})

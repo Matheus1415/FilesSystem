@@ -4,8 +4,8 @@
 
 @section('content')
     <main class="p-4">
-        <div class="flex gap-x-2 justify-center">
-            <div class="w-3/12 flex flex-col gap-y-4">
+        <div class="flex flex-col md:flex-row gap-x-2 gap-y-4 justify-center items-center md:items-start">
+            <div class="w-9/12 md:w-3/12 flex flex-col gap-y-4">
                 <x-card class="col-span-3">
                     <h3 class="capitalize text-lg text-frost font-semibold mb-2">
                         Account storage
@@ -22,6 +22,29 @@
                         <x-button icon='icon-upload' variant='primary'>
                             Upgrade
                         </x-button>
+                    </div>
+                </x-card>
+
+                <x-card>
+                    <div class="border-1 border-frost-50 rounded-md">
+                        <div class="p-4">
+                            <x-button class="text-sm !w-fit">
+                                Upload
+                            </x-button>
+                        </div>
+
+                        <hr>
+
+                        <div class="p-4">
+
+                            <form action="/upload-form" id="upload-form" class="dropzone">
+                                <div class="dz-message flex flex-col items-center justify-center border-2 border-dashed border-frost/50 rounded p-8 bg-background-foreground text-frost transition hover:bg-frost/10">
+                                    <i class="icon-upload text-5xl mb-4 text-primary"></i>
+                                    <span class="text-lg font-bold">Solte os arquivos aqui</span>
+                                    <span class="text-sm text-muted">Ou clique para escolher</span>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </x-card>
             </div>
@@ -73,7 +96,6 @@
                     </table>
                 </x-card>
             </div>
-
 
         </div>
     </main>
