@@ -79,3 +79,8 @@ A aplicação estará disponível em `http://localhost:8000`.
 - [Tailwind CSS](https://tailwindcss.com/) – Framework CSS utilitário
 - [jQuery](https://jquery.com/) – Biblioteca JavaScript para manipulação do DOM
 - [Lucide Icons](https://lucide.dev/) – Biblioteca de ícones de código aberto
+
+## 🤝 Contribuidores
+- [Matheus1415](https://github.com/Matheus1415/)
+- [DanielDeSousaDEV](https://github.com/DanielDeSousaDEV)
+
