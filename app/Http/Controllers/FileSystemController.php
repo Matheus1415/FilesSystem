@@ -24,9 +24,30 @@ class FileSystemController extends Controller
                 'countFile' => count($files),
             ];
         }
+
+        $allFiles = Storage::disk('public')->allFiles();
+
+        $fileSizes = [];
+
+        foreach ($allFiles as $filePath) {
+            $fileSizes[] = round(Storage::disk('public')->size($filePath)/ 1024 , 2);
+        };
+
+        $totalFilesSizeKB = array_reduce($fileSizes, 
+            fn($v1, $v2) => $v1 + $v2
+        , 0);
+
+        $totalFilesSizeKB = round($totalFilesSizeKB, 2);
+
+        $totalFilesSizeGB = round($totalFilesSizeKB / 1048576, 2);
+
+
         return view('home-page', [
             'directories' => $data,
             'countFileMain' => $countFileMain,
+            'totalFilesSizeKB' => $totalFilesSizeKB,
+            'totalFilesSizeGB' => $totalFilesSizeGB
+
         ]);
     }
 
@@ -363,5 +384,10 @@ class FileSystemController extends Controller
         ], 201);
     }
 
+    public function allFilesData(Request $request)
+    {
+
+        
+    }
 
 }

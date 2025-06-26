@@ -8,12 +8,20 @@
             <div class="w-9/12 md:w-3/12 flex flex-col gap-y-4">
                 <x-card class="col-span-3">
                     <h3 class="capitalize text-lg text-frost font-semibold mb-2">
-                        Account storage
+                        Espaço total (Gb)
                     </h3>
 
-                    <div class="bg-primary h-40 mb-2"></div>
+                    <div class="flex items-center justify-center mb-2">
+                        <p class="text-4xl text-center">
+                            <span class="text-primary ado">{{ $totalFilesSizeGB }}</span>
+                            <span>/</span>
+                            <span>2</span>
+                        </p>
+                    </div>
 
-                    <div class="flex items-center justify-center gap-4">
+                    {{-- <input type="range" readonly disabled value="{{ $totalFilesSizeGB }}" min="0" max="2" step="0.01" class="w-full"> --}}
+
+                    {{-- <div class="flex items-center justify-center gap-4">
                         <x-button icon='icon-search'>
                             Details
                         </x-button>
@@ -22,7 +30,7 @@
                         <x-button icon='icon-upload' variant='primary'>
                             Upgrade
                         </x-button>
-                    </div>  
+                    </div>   --}}
                 </x-card>
 
                 <x-card>
@@ -45,7 +53,7 @@
             <div class="w-9/12 flex flex-col gap-4">
                 <x-card class="col-span-9">
                     <h3 class="capitalize text-lg text-frost font-semibold mb-2">
-                        Folders
+                        Pastas
                     </h3>
 
                     <div class="grid grid-cols-3 gap-2">
@@ -100,3 +108,7 @@
         </div>
     </main>
 @endsection
+
+@push('css')
+    @vite(['resources/css/pages/home.css'])
+@endpush

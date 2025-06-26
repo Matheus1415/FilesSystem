@@ -14,3 +14,4 @@ Route::post('/upload/file',[FileSystemController::class,'uploadFile'])->name('up
 Route::get('/download/file', [FileSystemController::class, 'downloadFile'])->name('download.file');
 Route::get('/json-content', [FileSystemController::class, 'getJsonContent'])->name('read.json');
 Route::post('/create/folder', [FileSystemController::class, 'createFolder'])->name('create.folder');
+Route::get('/list/files', [FileSystemController::class, 'allFilesData'])->name('list.files');
